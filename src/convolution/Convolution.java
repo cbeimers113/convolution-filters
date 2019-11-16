@@ -55,7 +55,7 @@ public class Convolution {
 					}
 				}
 				s /= c;
-				try {
+				try { //Crashes on some non-square images
 					fPixels[x][y] = s;
 				} catch (ArrayIndexOutOfBoundsException e) {
 					continue;
