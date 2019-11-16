@@ -1,4 +1,4 @@
-package convolution.filters;
+package src.convolution.filters;
 
 import java.util.ArrayList;
 
@@ -6,6 +6,7 @@ public abstract class Filter {
 
 	public static ArrayList<Filter> filters = new ArrayList<Filter>();
 
+	public static final Filter none = new None();
 	public static final Filter horizontal = new Horizontal();
 	public static final Filter vertical = new Vertical();
 	public static final Filter diagonalPos = new DiagonalPositive();

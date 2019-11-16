@@ -1,4 +1,4 @@
-package convolution;
+package src.convolution;
 
 public class RasterImage {
 

@@ -1,4 +1,4 @@
-package convolution.filters;
+package src.convolution.filters;
 
 public class DiagonalNegative extends Filter {
 

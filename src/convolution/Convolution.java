@@ -1,15 +1,16 @@
-package convolution;
+package src.convolution;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import convolution.filters.Filter;
+import src.convolution.filters.Filter;
 
 public class Convolution {
 
@@ -35,13 +36,13 @@ public class Convolution {
 	}
 
 	private static RasterImage getFiltered(RasterImage image, Filter filter) {
+		if (filter == Filter.none) return image;
 		float[][] pixels = image.getPixels();
 		int w = image.getWidth();
 		int h = image.getHeight();
-		int fw, fh;
-		float[][] fPixels = new float[fw = w - (filter.getWidth() - 1)][fh = h - (filter.getHeight() - 1)];
-		for (int y = 0; y < fw; y++) {
-			for (int x = 0; x < fh; x++) {
+		float[][] fPixels = new float[w][h];
+		for (int y = 0; y < w; y++) {
+			for (int x = 0; x < h; x++) {
 				float s = 0;
 				float c = 0;
 				for (int yy = 0; yy < 3; yy++) {
@@ -55,14 +56,14 @@ public class Convolution {
 					}
 				}
 				s /= c;
-				try { //Crashes on some non-square images
+				try {
 					fPixels[x][y] = s;
 				} catch (ArrayIndexOutOfBoundsException e) {
 					continue;
 				}
 			}
 		}
-		return new RasterImage(fPixels, fw, fh);
+		return new RasterImage(fPixels, w, h);
 	}
 
 	private static RasterImage loadImage(File file) {
@@ -82,16 +83,19 @@ public class Convolution {
 		return null;
 	}
 
-	private static boolean filterAndSave(File file, Filter filter) {
+	private static BufferedImage filterAndSave(File file, Filter filter, int amount) {
 		RasterImage img = loadImage(file);
-		if (img == null) return false;
+		if (img == null) return null;
 		// TODO: make this more elegant
 		File output = new File(file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf('\\')) + "\\" + file.getName().substring(0, file.getName().lastIndexOf('.')) + "_" + filter.getID() + ".png");
 		if (output.exists()) output.delete();
+		BufferedImage raster = null;
 		try {
 			output.createNewFile();
-			RasterImage outImg = getFiltered(img, filter);
-			BufferedImage raster = new BufferedImage(outImg.getWidth(), outImg.getHeight(), BufferedImage.TYPE_INT_RGB);
+			RasterImage outImg = map(getFiltered(img, filter));
+			for (int i = 1; i < amount; i++)
+				outImg = map(getFiltered(outImg, filter));
+			raster = new BufferedImage(outImg.getWidth(), outImg.getHeight(), BufferedImage.TYPE_INT_RGB);
 			float[][] pixels = outImg.getPixels();
 			for (int y = 0; y < outImg.getHeight(); y++)
 				for (int x = 0; x < outImg.getWidth(); x++)
@@ -100,10 +104,11 @@ public class Convolution {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return true;
+		return raster;
 	}
 
 	private static File getFile() {
+		if (1 == 1) return new File("F:/filt_test_imgs/hello.png");
 		JFileChooser chooser = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Image Files", "jpg", "jpeg", "png", "bmp", "gif");
 		chooser.setFileFilter(filter);
@@ -116,7 +121,43 @@ public class Convolution {
 		return (Filter) JOptionPane.showInputDialog(null, "Choose Filter", "Choose Filter", JOptionPane.QUESTION_MESSAGE, null, Filter.filters.toArray(), Filter.filters.get(0));
 	}
 
+	private static float getMin(RasterImage image) {
+		float[][] pixels = image.getPixels();
+		float min = Float.MAX_VALUE;
+		for (int y = 0; y < image.getHeight(); y++)
+			for (int x = 0; x < image.getWidth(); x++)
+				if (pixels[x][y] < min) min = pixels[x][y];
+		return min;
+	}
+
+	private static float getMax(RasterImage image) {
+		float[][] pixels = image.getPixels();
+		float max = Float.MIN_VALUE;
+		for (int y = 0; y < image.getHeight(); y++)
+			for (int x = 0; x < image.getWidth(); x++)
+				if (pixels[x][y] > max) max = pixels[x][y];
+		return max;
+	}
+
+	private static RasterImage map(RasterImage image) {
+		/*
+		 * [0xFF/(max-min)] * n
+		 */
+		float max = getMax(image);
+		float min = getMin(image);
+		float[][] pixels = image.getPixels();
+		float[][] mapped = new float[image.getWidth()][image.getHeight()];
+		for (int y = 0; y < image.getHeight(); y++)
+			for (int x = 0; x < image.getWidth(); x++)
+				mapped[x][y] = (pixels[x][y] - min) / (max - min);
+		return new RasterImage(mapped, image.getWidth(), image.getHeight());
+	}
+
 	public static void main(String[] args) {
-		filterAndSave(getFile(), getFilter());
+		File file = getFile();
+		ArrayList<BufferedImage> imgs = new ArrayList<BufferedImage>();
+		for (Filter filter : Filter.filters)
+			imgs.add(filterAndSave(file, filter, 5));
+		new OutputDisplay(imgs);
 	}
 }
