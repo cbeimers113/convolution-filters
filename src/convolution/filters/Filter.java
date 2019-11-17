@@ -4,6 +4,16 @@ import java.util.ArrayList;
 
 public abstract class Filter {
 
+	private static class AllFilters extends Filter {
+		private AllFilters() {
+			super(null, 0, 0);
+		}
+
+		public String toString() {
+			return "All";
+		}
+	}
+
 	public static ArrayList<Filter> filters = new ArrayList<Filter>();
 
 	public static final Filter none = new None();
@@ -11,6 +21,7 @@ public abstract class Filter {
 	public static final Filter vertical = new Vertical();
 	public static final Filter diagonalPos = new DiagonalPositive();
 	public static final Filter diagonalNeg = new DiagonalNegative();
+	public static final Filter all = new AllFilters();
 
 	private float[][] weights;
 

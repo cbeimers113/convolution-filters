@@ -36,7 +36,7 @@ public class Convolution {
 	}
 
 	private static RasterImage getFiltered(RasterImage image, Filter filter) {
-		if (filter == Filter.none) return image;
+		if (filter == Filter.none || filter == Filter.all) return image;
 		float[][] pixels = image.getPixels();
 		int w = image.getWidth();
 		int h = image.getHeight();
@@ -108,7 +108,6 @@ public class Convolution {
 	}
 
 	private static File getFile() {
-		if (1 == 1) return new File("F:/filt_test_imgs/hello.png");
 		JFileChooser chooser = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Image Files", "jpg", "jpeg", "png", "bmp", "gif");
 		chooser.setFileFilter(filter);
@@ -155,9 +154,13 @@ public class Convolution {
 
 	public static void main(String[] args) {
 		File file = getFile();
-		ArrayList<BufferedImage> imgs = new ArrayList<BufferedImage>();
-		for (Filter filter : Filter.filters)
-			imgs.add(filterAndSave(file, filter, 5));
-		new OutputDisplay(imgs);
+		Filter filter = getFilter();
+		if (filter == Filter.all) {
+			ArrayList<BufferedImage> imgs = new ArrayList<BufferedImage>();
+			for (Filter f : Filter.filters)
+				if (f != Filter.all) imgs.add(filterAndSave(file, f, 1));
+		} else
+			filterAndSave(file, filter, 1);
+		// new OutputDisplay(imgs);
 	}
 }

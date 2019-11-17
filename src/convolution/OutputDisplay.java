@@ -15,7 +15,7 @@ public class OutputDisplay extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final float SCALE = 4;
+	private static final float SCALE = 0.5f;
 
 	public OutputDisplay(ArrayList<BufferedImage> imgs) {
 		if (imgs.size() == 0) return;
