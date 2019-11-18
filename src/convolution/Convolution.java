@@ -155,12 +155,14 @@ public class Convolution {
 	public static void main(String[] args) {
 		File file = getFile();
 		Filter filter = getFilter();
+		ArrayList<BufferedImage> imgs = new ArrayList<BufferedImage>();
 		if (filter == Filter.all) {
-			ArrayList<BufferedImage> imgs = new ArrayList<BufferedImage>();
 			for (Filter f : Filter.filters)
 				if (f != Filter.all) imgs.add(filterAndSave(file, f, 1));
-		} else
-			filterAndSave(file, filter, 1);
-		// new OutputDisplay(imgs);
+		} else {
+			imgs.add(filterAndSave(file, Filter.none, 1));
+			imgs.add(filterAndSave(file, filter, 1));
+		}
+		new OutputDisplay(imgs);
 	}
 }

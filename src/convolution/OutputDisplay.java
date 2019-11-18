@@ -15,12 +15,13 @@ public class OutputDisplay extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final float SCALE = 0.5f;
+	private static float SCALE;
 
 	public OutputDisplay(ArrayList<BufferedImage> imgs) {
 		if (imgs.size() == 0) return;
+		SCALE = 64.0f / imgs.get(0).getWidth();
 		setLayout(new FlowLayout(FlowLayout.LEFT));
-		setPreferredSize(new Dimension((int) ((imgs.size() + 1) * (imgs.get(0).getWidth() * SCALE + 5) - 5), (int) (imgs.get(0).getHeight() * SCALE + 60)));
+		setPreferredSize(new Dimension((int) (imgs.size() * (imgs.get(0).getWidth() * SCALE + 5) - 5), (int) (imgs.get(0).getHeight() * SCALE + 60)));
 		JLabel[] labels = new JLabel[imgs.size()];
 		for (int i = 0; i < labels.length; i++)
 			add(labels[i] = new JLabel(new ImageIcon(scale(imgs.get(i), SCALE))));
