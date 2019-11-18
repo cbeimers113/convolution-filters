@@ -12,6 +12,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import src.convolution.filters.Filter;
 
+/**
+ * Lets the user load a black and white image and outputs that image with one or more filters applied to it.
+ * Filters find patterns such as lines in different directions, and the output image emphasizes those features
+ * while minimalizing the rest of the image.
+ */
 public class Convolution {
 
 	/**
@@ -35,6 +40,11 @@ public class Convolution {
 		return c | (c << 8) | (c << 16);
 	}
 
+	/**
+	 * Returns the image after being filtered
+	 * @param image: image to filter
+	 * @param filter: filter to apply
+	 */
 	private static RasterImage getFiltered(RasterImage image, Filter filter) {
 		if (filter == Filter.none || filter == Filter.all) return image;
 		float[][] pixels = image.getPixels();
@@ -51,7 +61,7 @@ public class Convolution {
 					for (int xx = 0; xx < 3; xx++) {
 						int xOffs = x + xx;
 						if (xOffs >= w) continue;
-						s += pixels[xOffs][yOffs] * filter.getWeight(xx, yy);
+						s += pixels[xOffs][yOffs] * filter.getWeight(xx, yy); //Filtered image is the dot product of the filter with each AxB section of the image (filters have AxB dimension)
 						c++;
 					}
 				}
@@ -66,6 +76,7 @@ public class Convolution {
 		return new RasterImage(fPixels, w, h);
 	}
 
+	//Loads image file as a raster image
 	private static RasterImage loadImage(File file) {
 		float[][] pixels;
 		try {
@@ -74,7 +85,7 @@ public class Convolution {
 			pixels = new float[w = img.getWidth()][h = img.getHeight()];
 			for (int y = 0; y < h; y++)
 				for (int x = 0; x < w; x++)
-					pixels[x][y] = toSCPixel(img.getRGB(x, y));
+					pixels[x][y] = toSCPixel(img.getRGB(x, y)); //Load each pixel as a grayscale value
 			return new RasterImage(pixels, w, h);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -83,6 +94,13 @@ public class Convolution {
 		return null;
 	}
 
+	/**
+	 * Loads image, applies filter, then outputs filtered image to new file and returns that image in memory
+	 * @param file: File to load
+	 * @param filter: Filter to apply
+	 * @param amount: How many times to apply the filter
+	 * @return: Image data in memory
+	 */
 	private static BufferedImage filterAndSave(File file, Filter filter, int amount) {
 		RasterImage img = loadImage(file);
 		if (img == null) return null;
@@ -99,7 +117,7 @@ public class Convolution {
 			float[][] pixels = outImg.getPixels();
 			for (int y = 0; y < outImg.getHeight(); y++)
 				for (int x = 0; x < outImg.getWidth(); x++)
-					raster.setRGB(x, y, reconstructRGB(pixels[x][y]));
+					raster.setRGB(x, y, reconstructRGB(pixels[x][y])); //Output data restored to an RGB pixel
 			ImageIO.write(raster, "png", output);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -107,6 +125,10 @@ public class Convolution {
 		return raster;
 	}
 
+	/**
+	 * Dialog box to choose and load image file
+	 * @return: Chosen file
+	 */
 	private static File getFile() {
 		JFileChooser chooser = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Image Files", "jpg", "jpeg", "png", "bmp", "gif");
@@ -116,10 +138,19 @@ public class Convolution {
 		return null;
 	}
 
+	/**
+	 * Dialog box to choose filter
+	 * @return: Chosen filter
+	 */
 	private static Filter getFilter() {
 		return (Filter) JOptionPane.showInputDialog(null, "Choose Filter", "Choose Filter", JOptionPane.QUESTION_MESSAGE, null, Filter.filters.toArray(), Filter.filters.get(0));
 	}
 
+	/**
+	 * Find the pixel with the lowest value
+	 * @param image: Raster image to check
+	 * @return: Value of lowest pixel
+	 */
 	private static float getMin(RasterImage image) {
 		float[][] pixels = image.getPixels();
 		float min = Float.MAX_VALUE;
@@ -129,6 +160,11 @@ public class Convolution {
 		return min;
 	}
 
+	/**
+	 * Find the pixel with the highest value
+	 * @param image: Raster image to check
+	 * @return: Value of the highest pixel
+	 */
 	private static float getMax(RasterImage image) {
 		float[][] pixels = image.getPixels();
 		float max = Float.MIN_VALUE;
@@ -138,6 +174,13 @@ public class Convolution {
 		return max;
 	}
 
+	/**
+	 * Maps the input image to the range 0x00->0xFF by stretching the filtered data to fit.
+	 * The highest pixel in the filtered image is treated as 0xFF, and all pixels are multiplied
+	 * by a coefficient to fit this range. (Only returns coefficients, multiplied by 0xFF in reconstruction)
+	 * @param image: Image to map
+	 * @return: Image mapped to 0x00->0xFF
+	 */
 	private static RasterImage map(RasterImage image) {
 		/*
 		 * [0xFF/(max-min)] * n

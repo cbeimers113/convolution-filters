@@ -1,5 +1,8 @@
 package src.convolution.filters;
 
+/**
+ * Vertical line
+ */
 public class Vertical extends Filter {
 
 	private static float[][] getWeights() {

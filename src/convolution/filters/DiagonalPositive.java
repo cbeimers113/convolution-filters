@@ -1,5 +1,8 @@
 package src.convolution.filters;
 
+/**
+ * Positive angle diagonal line
+ */
 public class DiagonalPositive extends Filter {
 
 	private static float[][] getWeights() {

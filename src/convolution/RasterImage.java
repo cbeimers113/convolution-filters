@@ -1,5 +1,10 @@
 package src.convolution;
 
+/**
+ * Image data converted to array of floats between 0.0 and 1.0, with 0.0 representing
+ * an RGB pixel of 0x000000, and 1.0 representing 0xFFFFFF. Each channel has the same
+ * value, as it is loaded in grayscale.
+ */
 public class RasterImage {
 
 	private float[][] pixels;

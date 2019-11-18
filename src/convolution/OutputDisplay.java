@@ -17,10 +17,15 @@ public class OutputDisplay extends JFrame {
 
 	private static float SCALE;
 
+	/**
+	 * Outputs resulting images to a window to compare them
+	 * @param imgs: list of filtered images
+	 */
 	public OutputDisplay(ArrayList<BufferedImage> imgs) {
 		if (imgs.size() == 0) return;
 		SCALE = 64.0f / imgs.get(0).getWidth();
 		setLayout(new FlowLayout(FlowLayout.LEFT));
+		//scale up the images so you can see them
 		setPreferredSize(new Dimension((int) (imgs.size() * (imgs.get(0).getWidth() * SCALE + 5) - 5), (int) (imgs.get(0).getHeight() * SCALE + 60)));
 		JLabel[] labels = new JLabel[imgs.size()];
 		for (int i = 0; i < labels.length; i++)
@@ -33,6 +38,13 @@ public class OutputDisplay extends JFrame {
 		setTitle("Output");
 	}
 
+	/**
+	 * Scales up or down the image to be 64 pixels wide
+	 * 
+	 * @param img: image to scale
+	 * @param scale: scale factor
+	 * @return scaled image
+	 */
 	private static BufferedImage scale(BufferedImage img, float scale) {
 		BufferedImage out = null;
 		if (img != null) {
